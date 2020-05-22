@@ -13,27 +13,46 @@ $(document).ready(function () {
             response.task.id +
             '"><div class="card-body">' +
             response.task.title +
-            '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div></div>'
+            '<button data-id="' +
+            response.task.id +
+            '" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div></div>'
         );
       },
     });
     $("#createTaskForm")[0].reset();
   });
 
-  $("#taskList").on("click", ".card", function () {
-    var dataId = $(this).data("id");
-    $.ajax({
-      url: "/tasks/" + dataId + "/completed/",
-      data: {
-        csrfmiddlewaretoken: csrfToken,
-        id: dataId,
-      },
-      type: "POST",
-      success: function () {
-        var cardItem = $('#taskCard[data-id="' + dataId + '"]');
-        cardItem.css("text-decoration", "line-through").hide().slideDown();
-        $("#taskList").append(cardItem);
-      },
+  $("#taskList")
+    .on("click", ".card", function () {
+      var dataId = $(this).data("id");
+      $.ajax({
+        url: "/tasks/" + dataId + "/completed/",
+        data: {
+          csrfmiddlewaretoken: csrfToken,
+          id: dataId,
+        },
+        type: "POST",
+        success: function () {
+          var cardItem = $('#taskCard[data-id="' + dataId + '"]');
+          cardItem.css("text-decoration", "line-through").hide().slideDown();
+          $("#taskList").append(cardItem);
+        },
+      });
+    })
+    .on("click", "button.close", function (event) {
+      event.stopPropagation();
+      var dataId = $(this).data("id");
+      $.ajax({
+        url: "/tasks/" + dataId + "/delete/",
+        data: {
+          csrfmiddlewaretoken: csrfToken,
+          id: dataId,
+        },
+        type: "POST",
+        dataType: "json",
+        success: function () {
+          $('#taskCard[data-id="' + dataId + '"]').remove();
+        },
+      });
     });
-  });
 });
